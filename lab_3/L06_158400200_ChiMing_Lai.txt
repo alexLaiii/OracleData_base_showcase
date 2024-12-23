@@ -1,0 +1,136 @@
+-- ***********************
+-- Name: Chi Ming Lai
+-- Student ID: 158400200
+-- Date: 05 July 2022
+-- Purpose: Lab 6 DBS311
+-- ***********************
+
+Questions 1.
+-- Calculate the employee annual salary
+
+Q1 solution
+CREATE OR REPLACE PROCEDURE calculate_salary15(empID IN employees.employee_id%type) 
+AS
+    f_employee employees%rowtype;
+    increaseSal NUMBER;
+    workYears NUMBER;
+BEGIN
+    SELECT * INTO f_employee
+    FROM employees
+    WHERE employee_id = empID;
+    
+    increaseSal := 10000;
+    workYears := FLOOR(MONTHS_BETWEEN(SYSDATE, f_employee.hire_date)/12);
+     dbms_output.put_line('workYears: ' || workYears);
+    FOR i IN 1..workYears 
+	LOOP
+        	increaseSal := increaseSal * 1.05;
+    	END LOOP;
+    dbms_output.put_line('First Name: ' || f_employee.first_name);
+    dbms_output.put_line('Last Name: ' || f_employee.last_name);
+    dbms_output.put_line('Salary: $' || increaseSal);
+EXCEPTION
+    WHEN NO_DATA_FOUND
+    THEN 
+        dbms_output.put_line('No employees found');
+    WHEN OTHERS
+    THEN
+        dbms_output.put_line('ERROR');
+END;
+    
+    
+BEGIN
+   calculate_salary15(6);
+END;
+
+Questions 2. 
+-- Calculate the employee annual salary
+
+Q2 solution
+CREATE OR REPLACE PROCEDURE findCity(aCity IN locations.city%type) 
+AS
+    CURSOR city_cursor IS
+        SELECT d.department_id, d.department_name
+        FROM departments d INNER JOIN locations l
+        ON d.location_id = l.location_id
+        WHERE UPPER(l.city) = UPPER(aCity);
+BEGIN
+  
+     FOR i IN city_cursor
+     LOOP
+        dbms_output.put_line('Department id: ' || i.department_id || ' Department name: ' || i.department_name);
+    END LOOP;
+    
+    IF city_cursor%ISOPEN 
+    THEN
+        CLOSE city_cursor;
+  	END IF;
+END;
+
+Result:
+Department id: 60 Department name: IT
+
+
+PL/SQL procedure successfully completed.
+
+Department id: 20 Department name: Marketing
+
+
+PL/SQL procedure successfully completed.
+
+Department id: 10 Department name: Admin
+Department id: 90 Department name: Executive
+Department id: 110 Department name: Accounting
+Department id: 190 Department name: Contracting
+Department id: 200 Department name: Actuarial
+
+
+PL/SQL procedure successfully completed.
+
+
+Questions 3.
+-- find the employees work here
+Q3 solution
+
+CREATE OR REPLACE PROCEDURE employee_works_here15
+AS
+   counter NUMBER := 15;
+   empID NUMBER;
+   lName VARCHAR2(25 BYTE);
+   departName VARCHAR2(25 BYTE);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Employee #		Last Name		Department Name');
+    
+  LOOP
+    EXIT WHEN counter < 1;
+    SELECT e.employee_id, e.last_name, NVL(d.department_name, 'no department name')
+    INTO empID, lName, departName
+    FROM employees e JOIN departments d
+    ON e.department_id = d.department_id
+    WHERE e.employee_id = counter;
+    counter := counter - 1;
+    DBMS_OUTPUT.PUT_LINE(empID || '                ' || lName || '        ' || departName);
+  END LOOP;
+    EXCEPTION 
+    WHEN NO_DATA_FOUND
+    THEN
+        dbms_output.put_line('employees not found');
+    WHEN OTHERS
+    THEN 
+        dbms_output.put_line('ERROR');
+END;
+
+    
+BEGIN
+   employee_works_here15;
+END;
+
+
+result:
+Employee #		Last Name		Department Name
+15                Cornel        Sales
+14                Torson        Sales
+employees not found
+
+
+PL/SQL procedure successfully completed.
